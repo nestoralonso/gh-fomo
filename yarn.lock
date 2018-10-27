@@ -2841,6 +2841,11 @@ data-urls@^1.0.0, data-urls@^1.0.1:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
+date-fns@^2.0.0-alpha.24:
+  version "2.0.0-alpha.24"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.0.0-alpha.24.tgz#2988c137c72275af29d7d21cc53eb52b3a8c2586"
+  integrity sha512-jpLzKHKSq0nTcZ3K5ZnTelxWmUwPepuoEaXkATwIUnc1tc+/rIooAvDMR+zdAGnwQ35eVWiyn5dikoLHjhEYeA==
+
 date-now@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
@@ -5854,11 +5859,6 @@ locate-path@^3.0.0:
   dependencies:
     p-locate "^3.0.0"
     path-exists "^3.0.0"
-
-lodash-es@^4.17.11:
-  version "4.17.11"
-  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.11.tgz#145ab4a7ac5c5e52a3531fb4f310255a152b4be0"
-  integrity sha512-DHb1ub+rMjjrxqlB3H56/6MXtm1lSksDp2rA2cNWjG8mlDUYFhUj3Di2Zn5IwSU87xLv8tNIQ7sSwE/YOX/D/Q==
 
 lodash._reinterpolate@~3.0.0:
   version "3.0.0"

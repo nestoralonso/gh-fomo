@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Query } from 'react-apollo';
 import { gql } from 'apollo-boost';
-
+import formatDistance from 'date-fns/formatDistance';
 
 const GET_FOLLOWING_STARRED = gql`
 query GET_FOLLOWING_STARRED($user: String!, $afterCursor: String, $beforeCursor: String) {
@@ -9,6 +9,7 @@ query GET_FOLLOWING_STARRED($user: String!, $afterCursor: String, $beforeCursor:
     following(first: 10, after: $afterCursor, before: $beforeCursor) {
       totalCount
       pageInfo {
+        startCursor
         endCursor
         hasNextPage
         hasPreviousPage
@@ -43,8 +44,9 @@ const Repo = React.memo(function Repo({ nameWithOwner, description, starredAt, u
   return (
     <div className="repo-box">
       <h3><a href={url}>{name}</a></h3>
-      <div>{owner}</div>
-      <div>{starredAt}</div>
+      <div className="repo-owner">{owner}</div>
+
+      <div className="starred-at">{formatDistance(starredAt, new Date(), {addSuffix: true})}</div>
       <p>
         {description}
       </p>
@@ -52,7 +54,7 @@ const Repo = React.memo(function Repo({ nameWithOwner, description, starredAt, u
   );
 })
 
-const User = (props) => {
+const User = React.memo(function User(props) {
   const { starredRepositories: { edges: repos } } = props;
   const { name, url } = props;
   let nameSanitized = name;
@@ -61,7 +63,6 @@ const User = (props) => {
     nameSanitized = split[split.length - 1];
   }
 
-  console.log('>>', { name, url, nameSanitized });
   return (
     <div className="person-with-repos">
       <img className="person-avatar" width="64" height="64" src={props.avatarUrl} alt={nameSanitized} />
@@ -72,7 +73,7 @@ const User = (props) => {
       </div>
     </div>
   );
-}
+})
 
 export default class FollowingStarred extends Component {
   static defaultProps = {
@@ -91,32 +92,32 @@ export default class FollowingStarred extends Component {
     if (!user || !user.trim()) {
       return null;
     }
+
+    console.log('state', { afterCursor, beforeCursor });
     return (
       <Query query={GET_FOLLOWING_STARRED} variables={{ user, afterCursor, beforeCursor }}>
         {({ loading, error, data }) => {
           if (loading) return <div>Loading...</div>;
           if (error) return <div>Error :(</div>;
 
-          const { user: { following: { edges: peopleWithRepos, pageInfo: { hasNextPage, hasPreviousPage } } } } = data;
+          const { user: { following: { edges: peopleWithRepos, pageInfo: { hasNextPage, hasPreviousPage, endCursor, startCursor } } } } = data;
+          console.log('result', { startCursor, endCursor });
 
           if (!peopleWithRepos || !peopleWithRepos.length) {
             return null;
           }
 
           const handleNextPage = () => {
-            const lastIdx = peopleWithRepos.length - 1;
-            const cursor = peopleWithRepos[lastIdx].cursor;
             this.setState({
-              afterCursor: cursor,
+              afterCursor: endCursor,
               beforeCursor: undefined
             })
           };
 
           const handlePrevPage = () => {
-            const cursor = peopleWithRepos[0].cursor;
             this.setState({
               afterCursor: undefined,
-              beforeCursor: cursor
+              beforeCursor: startCursor
             })
           };
 

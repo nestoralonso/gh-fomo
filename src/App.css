@@ -34,6 +34,16 @@ body {
   padding: 6px;
 }
 
+.repo-box h3 {
+  margin: 0;
+  padding: 0;
+  margin-bottom: 3px;
+}
+
+.repo-owner, .starred-at {
+  font-size: 0.7rem;
+}
+
 .people-with-repos {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -84,4 +94,12 @@ body {
 .pagination {
   margin-bottom: 1rem;
   margin-top: 1rem;
+}
+
+.pagination button {
+  margin-left: 0.5rem;
+}
+
+.pagination button[disabled] {
+  color: #555;
 }
