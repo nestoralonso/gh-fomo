@@ -4,7 +4,7 @@ import FollowingStarred from './FollowingStarred';
 
 
 function App() {
-  const [ user, setUser ] = useState('nestoralonso');
+  const [ user, setUser ] = useState('yyx990803');
   const [ searchTerm, setSearchTerm ] = useState(user);
 
   useEffect(
@@ -12,6 +12,8 @@ function App() {
       const query = window.location.search.substr(1);
       const params = new URLSearchParams(query);
       const userName = params.get('user');
+
+      if (!userName) return;
       setSearchTerm(userName);
       setUser(userName);
     },
