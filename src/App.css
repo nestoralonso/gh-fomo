@@ -66,6 +66,13 @@ body {
   color: #61dafb;
 }
 
+.person-with-repos .explore-link {
+  color: #fdffff;
+  border: 1px solid #fdffff;
+  border-radius: 3px;
+  margin-left: 1rem;
+}
+
 .person-repos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -103,3 +110,4 @@ body {
 .pagination button[disabled] {
   color: #555;
 }
+

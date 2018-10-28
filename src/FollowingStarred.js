@@ -19,7 +19,7 @@ query GET_FOLLOWING_STARRED($user: String!, $cursor: String) {
       edges {
         cursor
         node {
-          id
+          login
           name
           url
           avatarUrl
@@ -64,15 +64,17 @@ const User = React.memo(function User(props) {
 
   const { name, url } = props;
   let nameSanitized = name;
+  const split = url.split('/');
+  const userName = split[split.length - 1];
+
   if (!nameSanitized) {
-    const split = url.split('/');
-    nameSanitized = split[split.length - 1];
+    nameSanitized = userName;
   }
   const revRepos = repos.slice(0).reverse();
   return (
     <div className="person-with-repos">
       <img className="person-avatar" width="64" height="64" src={props.avatarUrl} alt={nameSanitized} />
-      <h2><a href={url}>{nameSanitized}</a></h2>
+      <h2><a href={url}>{nameSanitized}</a> <a className="explore-link" href={`/user?user=${userName}`}>→</a></h2>
 
       <div className="person-repos">
         {revRepos.map(({ node: repo, starredAt }) =>
@@ -143,7 +145,7 @@ export default class FollowingStarred extends Component {
 
           return <>
             <div className="people-with-repos">
-              {peopleWithRepos.map(({ node }) => <User key={node.id} {...node} />)}
+              {peopleWithRepos.map(({ node }) => <User key={node.login} {...node} />)}
             </div>
 
             <Pagination
