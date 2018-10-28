@@ -4,9 +4,9 @@ import { gql } from 'apollo-boost';
 import formatDistance from 'date-fns/formatDistance';
 
 const GET_FOLLOWING_STARRED = gql`
-query GET_FOLLOWING_STARRED($user: String!, $afterCursor: String) {
+query GET_FOLLOWING_STARRED($user: String!, $cursor: String) {
   user(login: $user) {
-    following(first: 10, after: $afterCursor) {
+    following(first: 10, after: $cursor) {
       totalCount
       pageInfo {
         startCursor
@@ -56,6 +56,11 @@ const Repo = React.memo(function Repo({ nameWithOwner, description, starredAt, u
 
 const User = React.memo(function User(props) {
   const { starredRepositories: { edges: repos } } = props;
+
+  if (!repos || !repos.length) {
+    return null;
+  }
+
   const { name, url } = props;
   let nameSanitized = name;
   if (!nameSanitized) {
@@ -81,20 +86,24 @@ export default class FollowingStarred extends Component {
   };
 
   state = {
-    afterCursor: undefined,
+    cursor: undefined,
     lastAfterCursor: []
   };
 
   render() {
     const { user } = this.props;
-    const { afterCursor, lastAfterCursor } = this.state;
+    const { cursor, lastAfterCursor } = this.state;
 
     if (!user || !user.trim()) {
       return null;
     }
 
     return (
-      <Query query={GET_FOLLOWING_STARRED} variables={{ user, afterCursor }}>
+      <Query
+        query={GET_FOLLOWING_STARRED}
+        variables={{ user, cursor }}
+        fetchPolicy="cache-and-network"
+      >
         {({ loading, error, data }) => {
           if (loading) return <div>Loading...</div>;
           if (error) return <div>Error :(</div>;
@@ -107,17 +116,17 @@ export default class FollowingStarred extends Component {
 
           const handleNextPage = () => {
             this.setState({
-              afterCursor: endCursor,
+              cursor: endCursor,
               lastAfterCursor: lastAfterCursor.concat(startCursor)
             })
           };
 
-          console.log('lastAfterCursor', lastAfterCursor);
+          console.log('<<>>', { startCursor, endCursor });
           const handlePrevPage = () => {
             const newLastCursor = lastAfterCursor.slice(0)
             const last = newLastCursor.pop();
             this.setState({
-              afterCursor: last,
+              cursor: last,
               lastAfterCursor: newLastCursor
             })
           };

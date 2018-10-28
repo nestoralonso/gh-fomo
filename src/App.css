@@ -46,7 +46,7 @@ body {
 
 .people-with-repos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   grid-gap: 10px;
   grid-auto-rows: minmax(100px, auto);
 }
@@ -68,9 +68,8 @@ body {
 
 .person-repos {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   grid-gap: 5px;
-  grid-auto-rows: minmax(100px, auto);
 }
 
 .search-box, .search-box input {

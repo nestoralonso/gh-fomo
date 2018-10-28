@@ -18,7 +18,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Github Fan</h1>
+      <h1>GH FOMO</h1>
       <div className="center">
         <form onSubmit={handleSearchClick} className="search-box">
           <label>User:<input type="text" value={user} onChange={handleChangeUser} /></label>
