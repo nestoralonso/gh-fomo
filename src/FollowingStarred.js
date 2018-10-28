@@ -4,9 +4,9 @@ import { gql } from 'apollo-boost';
 import formatDistance from 'date-fns/formatDistance';
 
 const GET_FOLLOWING_STARRED = gql`
-query GET_FOLLOWING_STARRED($user: String!, $afterCursor: String, $beforeCursor: String) {
+query GET_FOLLOWING_STARRED($user: String!, $afterCursor: String) {
   user(login: $user) {
-    following(first: 10, after: $afterCursor, before: $beforeCursor) {
+    following(first: 10, after: $afterCursor) {
       totalCount
       pageInfo {
         startCursor
@@ -82,26 +82,24 @@ export default class FollowingStarred extends Component {
 
   state = {
     afterCursor: undefined,
-    beforeCursor: undefined
+    lastAfterCursor: []
   };
 
   render() {
     const { user } = this.props;
-    const { afterCursor, beforeCursor } = this.state;
+    const { afterCursor, lastAfterCursor } = this.state;
 
     if (!user || !user.trim()) {
       return null;
     }
 
-    console.log('state', { afterCursor, beforeCursor });
     return (
-      <Query query={GET_FOLLOWING_STARRED} variables={{ user, afterCursor, beforeCursor }}>
+      <Query query={GET_FOLLOWING_STARRED} variables={{ user, afterCursor }}>
         {({ loading, error, data }) => {
           if (loading) return <div>Loading...</div>;
           if (error) return <div>Error :(</div>;
 
           const { user: { following: { edges: peopleWithRepos, pageInfo: { hasNextPage, hasPreviousPage, endCursor, startCursor } } } } = data;
-          console.log('result', { startCursor, endCursor });
 
           if (!peopleWithRepos || !peopleWithRepos.length) {
             return null;
@@ -110,14 +108,17 @@ export default class FollowingStarred extends Component {
           const handleNextPage = () => {
             this.setState({
               afterCursor: endCursor,
-              beforeCursor: undefined
+              lastAfterCursor: lastAfterCursor.concat(startCursor)
             })
           };
 
+          console.log('lastAfterCursor', lastAfterCursor);
           const handlePrevPage = () => {
+            const newLastCursor = lastAfterCursor.slice(0)
+            const last = newLastCursor.pop();
             this.setState({
-              afterCursor: undefined,
-              beforeCursor: startCursor
+              afterCursor: last,
+              lastAfterCursor: newLastCursor
             })
           };
 
