@@ -3,10 +3,11 @@ import { Query } from 'react-apollo';
 import { gql } from 'apollo-boost';
 import formatDistance from 'date-fns/formatDistance';
 
+
 const GET_FOLLOWING_STARRED = gql`
 query GET_FOLLOWING_STARRED($user: String!, $cursor: String) {
   user(login: $user) {
-    following(first: 10, after: $cursor) {
+    following(first: 20, after: $cursor) {
       totalCount
       pageInfo {
         startCursor
@@ -22,7 +23,7 @@ query GET_FOLLOWING_STARRED($user: String!, $cursor: String) {
           name
           url
           avatarUrl
-          starredRepositories(last: 6) {
+          starredRepositories(last: 4) {
             edges {
               starredAt
               node {
@@ -46,7 +47,7 @@ const Repo = React.memo(function Repo({ nameWithOwner, description, starredAt, u
       <h3><a href={url}>{name}</a></h3>
       <div className="repo-owner">{owner}</div>
 
-      <div className="starred-at">{formatDistance(starredAt, new Date(), {addSuffix: true})}</div>
+      <div className="starred-at">{formatDistance(starredAt, new Date(), { addSuffix: true })}</div>
       <p>
         {description}
       </p>
@@ -67,14 +68,16 @@ const User = React.memo(function User(props) {
     const split = url.split('/');
     nameSanitized = split[split.length - 1];
   }
-
+  const revRepos = repos.slice(0).reverse();
   return (
     <div className="person-with-repos">
       <img className="person-avatar" width="64" height="64" src={props.avatarUrl} alt={nameSanitized} />
       <h2><a href={url}>{nameSanitized}</a></h2>
 
       <div className="person-repos">
-        {repos.map(({ node: repo, starredAt }) => <Repo key={repo.nameWithOwner} starredAt={starredAt} {...repo} />)}
+        {revRepos.map(({ node: repo, starredAt }) =>
+          <Repo key={repo.nameWithOwner} starredAt={starredAt} {...repo} />)
+        }
       </div>
     </div>
   );
@@ -85,14 +88,34 @@ export default class FollowingStarred extends Component {
     user: 'mrdoob'
   };
 
-  state = {
-    cursor: undefined,
-    lastAfterCursor: []
-  };
+  loadMore = (fetchMore, cursor) => {
+    const { user } = this.props;
+    return fetchMore({
+      variables: {
+        user,
+        cursor
+      },
+      updateQuery(previousResult, { fetchMoreResult }) {
+        const newEdges = fetchMoreResult.user.following.edges;
+        const pageInfo = fetchMoreResult.user.following.pageInfo;
+
+        return {
+          user: {
+            __typename: previousResult.user.__typename,
+            following: {
+              __typename: previousResult.user.following.__typename,
+              totalCount: previousResult.user.following.totalCount,
+              edges: [...previousResult.user.following.edges, ...newEdges],
+              pageInfo
+            }
+          }
+        };
+      }
+    });
+  }
 
   render() {
     const { user } = this.props;
-    const { cursor, lastAfterCursor } = this.state;
 
     if (!user || !user.trim()) {
       return null;
@@ -101,53 +124,31 @@ export default class FollowingStarred extends Component {
     return (
       <Query
         query={GET_FOLLOWING_STARRED}
-        variables={{ user, cursor }}
+        variables={{ user }}
         fetchPolicy="cache-and-network"
       >
-        {({ loading, error, data }) => {
+        {({ loading, error, data, fetchMore }) => {
           if (loading) return <div>Loading...</div>;
           if (error) return <div>Error :(</div>;
 
-          const { user: { following: { edges: peopleWithRepos, pageInfo: { hasNextPage, hasPreviousPage, endCursor, startCursor } } } } = data;
+          const { user: { following: { edges: peopleWithRepos, pageInfo: { hasNextPage, endCursor } } } } = data;
 
           if (!peopleWithRepos || !peopleWithRepos.length) {
             return null;
           }
 
           const handleNextPage = () => {
-            this.setState({
-              cursor: endCursor,
-              lastAfterCursor: lastAfterCursor.concat(startCursor)
-            })
-          };
-
-          console.log('<<>>', { startCursor, endCursor });
-          const handlePrevPage = () => {
-            const newLastCursor = lastAfterCursor.slice(0)
-            const last = newLastCursor.pop();
-            this.setState({
-              cursor: last,
-              lastAfterCursor: newLastCursor
-            })
+            this.loadMore(fetchMore, endCursor);
           };
 
           return <>
-            <Pagination
-              handlePrevPage={handlePrevPage}
-              handleNextPage={handleNextPage}
-              hasNextPage={hasNextPage}
-              hasPreviousPage={hasPreviousPage}
-            />
-
             <div className="people-with-repos">
               {peopleWithRepos.map(({ node }) => <User key={node.id} {...node} />)}
             </div>
 
             <Pagination
-              handlePrevPage={handlePrevPage}
               handleNextPage={handleNextPage}
               hasNextPage={hasNextPage}
-              hasPreviousPage={hasPreviousPage}
             />
           </>
         }}
@@ -156,26 +157,16 @@ export default class FollowingStarred extends Component {
   }
 }
 
-function Pagination({ handlePrevPage, handleNextPage, hasNextPage, hasPreviousPage }) {
+function Pagination({ handleNextPage, hasNextPage }) {
   return (
     <div className="center">
-      <div className="pagination">
-        <button
-          onClick={handlePrevPage}
-          disabled={!hasPreviousPage}
-          className="last"
-        >
-          Prev
+      <button
+        onClick={handleNextPage}
+        disabled={!hasNextPage}
+        className="next"
+      >
+        Next
         </button>
-
-        <button
-          onClick={handleNextPage}
-          disabled={!hasNextPage}
-          className="next"
-        >
-          Next
-        </button>
-      </div>
     </div>
   );
 }
