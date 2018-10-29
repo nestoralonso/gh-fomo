@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import './App.css';
-import FollowingStarred from './FollowingStarred';
 
+const FollowingStarred = React.lazy(() => import('./FollowingStarred'));
 
 function App() {
-  const [ user, setUser ] = useState('yyx990803');
+  const [ user, setUser ] = useState('');
   const [ searchTerm, setSearchTerm ] = useState(user);
 
   useEffect(
@@ -32,13 +32,16 @@ function App() {
   return (
     <div className="App">
       <h1>GH FOMO</h1>
-      <div className="center">
-        <form onSubmit={handleSearchClick} className="search-box">
-          <label>User:<input type="text" value={user} onChange={handleChangeUser} /></label>
-          <button>Go</button>
-        </form>
-      </div>
-      <FollowingStarred user={searchTerm} />
+        <div className="center">
+          <form onSubmit={handleSearchClick} className="search-box">
+            <label>User:<input type="text" value={user} onChange={handleChangeUser} /></label>
+            <button>Go</button>
+          </form>
+        </div>
+
+        <Suspense fallback="loading ...">
+          {searchTerm && <FollowingStarred user={searchTerm} />}
+        </Suspense>
     </div>
   );
 }
