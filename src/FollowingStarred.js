@@ -42,6 +42,7 @@ query GET_FOLLOWING_STARRED($user: String!, $cursor: String) {
 
 const Repo = React.memo(function Repo({ nameWithOwner, description, starredAt, url }) {
   const [owner, name] = nameWithOwner.split('/');
+
   return (
     <div className="repo-box">
       <h3><a href={url}>{name}</a></h3>

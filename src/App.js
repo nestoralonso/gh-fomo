@@ -1,14 +1,16 @@
 import React, { useState, useEffect, Suspense } from 'react';
+import useLocalStorage from './useLocalStorage';
 import './App.css';
 
 const FollowingStarred = React.lazy(() => import('./FollowingStarred'));
 
 function App() {
   const [ user, setUser ] = useState('');
-  const [ searchTerm, setSearchTerm ] = useState(user);
+  const [ searchTerm, setSearchTerm ] = useLocalStorage('searchTerm', '');
 
   useEffect(
     () => {
+      // Copy the user from the URL to the state if it is present
       const query = window.location.search.substr(1);
       const params = new URLSearchParams(query);
       const userName = params.get('user');
@@ -19,6 +21,13 @@ function App() {
     },
     []
   );
+
+  useEffect(() => {
+    if (searchTerm && !user) {
+      setUser(searchTerm);
+    }
+  }, []);
+
   const handleChangeUser = (e) => {
     const value = e.target.value;
     setUser(value);
