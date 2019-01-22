@@ -71,7 +71,7 @@ const User = React.memo(function User(props) {
   if (!nameSanitized) {
     nameSanitized = userName;
   }
-  const revRepos = [...repos].reverse();
+  const revRepos = repos.slice(0).reverse();
   return (
     <div className="person-with-repos">
       <img className="person-avatar" width="64" height="64" src={props.avatarUrl} alt={nameSanitized} />
