@@ -7,7 +7,7 @@ import formatDistance from 'date-fns/formatDistance';
 const GET_FOLLOWING_STARRED = gql`
 query GET_FOLLOWING_STARRED($user: String!, $cursor: String) {
   user(login: $user) {
-    following(first: 20, after: $cursor) {
+    following(first: 100, after: $cursor) {
       totalCount
       pageInfo {
         startCursor
